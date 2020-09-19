@@ -1,7 +1,7 @@
 package com.stdevi.burgerjoints.controller;
 
 import com.stdevi.burgerjoints.model.venue.Venue;
-import com.stdevi.burgerjoints.service.BurgerJointsService;
+import com.stdevi.burgerjoints.service.VenueService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,10 +14,10 @@ import reactor.core.publisher.Flux;
 @AllArgsConstructor
 public class BurgerJointsController {
 
-    private final BurgerJointsService burgerJointsService;
+    private final VenueService venueService;
 
     @GetMapping
     public Flux<Venue> getBurgerJointsNear(@RequestParam String place) {
-        return burgerJointsService.getBurgerJointsNear(place);
+        return venueService.getVenuesWithPhotoNear(place);
     }
 }

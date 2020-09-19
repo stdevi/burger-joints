@@ -2,6 +2,7 @@ package com.stdevi.burgerjoints.client;
 
 import com.stdevi.burgerjoints.model.recognition.PhotoUrlsWrapper;
 import com.stdevi.burgerjoints.model.recognition.RecognitionResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,8 +15,8 @@ public class PhotoRecognitionClient {
 
     private final WebClient webClient;
 
-    public PhotoRecognitionClient(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://pplkdijj76.execute-api.eu-west-1.amazonaws.com/prod/recognize").build();
+    public PhotoRecognitionClient(WebClient.Builder webClientBuilder, @Value("${amazonaws.recognition.api.baseUrl}") String baseURL) {
+        this.webClient = webClientBuilder.baseUrl(baseURL).build();
     }
 
     public Mono<RecognitionResponse> findFirstBurgerPhoto(PhotoUrlsWrapper photoUrlsWrapper) {

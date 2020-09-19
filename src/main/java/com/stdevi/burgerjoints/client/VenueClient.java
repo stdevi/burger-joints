@@ -28,8 +28,8 @@ public class VenueClient {
     @Value("${foursquare.api.search.v}")
     private String v;
 
-    public VenueClient(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://api.foursquare.com/v2/venues").build();
+    public VenueClient(WebClient.Builder webClientBuilder, @Value("${foursquare.api.baseUrl}") String baseURL) {
+        this.webClient = webClientBuilder.baseUrl(baseURL).build();
     }
 
     public Mono<VenuesSearchResponse> searchVenuesNear(String place) {
