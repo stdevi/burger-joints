@@ -16,5 +16,5 @@ public class VenuesSearchResponse {
     private Meta meta;
 
     @JsonProperty("response")
-    private Venues venues;
+    private VenuesWrapper venuesWrapper;
 }

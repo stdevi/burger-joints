@@ -10,7 +10,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @ToString
-public class Venues {
+public class VenuesWrapper {
 
     @JsonProperty("venues")
     private List<Venue> venues;
