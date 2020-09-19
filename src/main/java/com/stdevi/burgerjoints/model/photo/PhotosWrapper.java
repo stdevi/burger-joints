@@ -1,4 +1,4 @@
-package com.stdevi.burgerjoints.model;
+package com.stdevi.burgerjoints.model.photo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,11 +10,8 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @ToString
-public class VenuesSearchResponse {
+public class PhotosWrapper {
 
-    @JsonProperty("meta")
-    private Meta meta;
-
-    @JsonProperty("response")
-    private VenuesWrapper venuesWrapper;
+    @JsonProperty("photos")
+    private Photos photos;
 }

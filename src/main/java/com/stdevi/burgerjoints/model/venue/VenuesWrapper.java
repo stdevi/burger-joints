@@ -1,4 +1,4 @@
-package com.stdevi.burgerjoints.model;
+package com.stdevi.burgerjoints.model.venue;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

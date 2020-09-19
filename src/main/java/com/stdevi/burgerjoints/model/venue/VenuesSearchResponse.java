@@ -1,8 +1,9 @@
-package com.stdevi.burgerjoints.model;
+package com.stdevi.burgerjoints.model.venue;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.stdevi.burgerjoints.model.Meta;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -10,11 +11,11 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @ToString
-public class Venue {
+public class VenuesSearchResponse {
 
-    @JsonProperty("id")
-    private String id;
+    @JsonProperty("meta")
+    private Meta meta;
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("response")
+    private VenuesWrapper venuesWrapper;
 }
