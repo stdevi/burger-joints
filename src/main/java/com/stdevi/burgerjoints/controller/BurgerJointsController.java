@@ -13,7 +13,7 @@ public class BurgerJointsController {
 
     private final VenueService venueService;
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = "https://burger-joints-frontend.herokuapp.com")
     @GetMapping
     public Flux<Venue> getBurgerJointsNear(@RequestParam String place) {
         return venueService.getVenuesWithPhotoNear(place);
