@@ -21,7 +21,8 @@ import reactor.util.function.Tuple2;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @ExtendWith(MockitoExtension.class)
 class BurgerJointsServiceTest {
@@ -91,8 +92,8 @@ class BurgerJointsServiceTest {
 
         StepVerifier.create(venueFlux.log()).expectErrorSatisfies(throwable -> {
             ClientException clientException = (ClientException) throwable;
-            assertEquals(clientException.getStatus(), HttpStatus.BAD_REQUEST);
-            assertEquals(clientException.getMessage(), "Couldn't geocode param near: testPlace");
+            assertEquals(HttpStatus.BAD_REQUEST, clientException.getStatus());
+            assertEquals("Couldn't geocode param near: testPlace", clientException.getMessage());
         }).verify();
     }
 
@@ -109,11 +110,13 @@ class BurgerJointsServiceTest {
         burgerJointsService = new BurgerJointsService(venueClient, null);
 
         Venue venue = new Venue("42", "BurgerJoint", null);
-        Tuple2<Venue, List<String>> venuePhotoUrls = burgerJointsService.getPhotoUrlsPerVenue(venue).block();
+        Mono<Tuple2<Venue, List<String>>> photoUrlsPerVenue = burgerJointsService.getPhotoUrlsPerVenue(venue);
 
-        assertEquals(venuePhotoUrls.getT1().getId(), "42");
-        assertEquals(venuePhotoUrls.getT2().size(), 2);
-        assertEquals(venuePhotoUrls.getT2().get(0), "https://fastly.4sqi.net/img/general/450x450/01.jpg");
+        StepVerifier.create(photoUrlsPerVenue.log()).assertNext(tuple -> {
+            assertEquals("42", tuple.getT1().getId());
+            assertEquals(2, tuple.getT2().size());
+            assertEquals("https://fastly.4sqi.net/img/general/450x450/01.jpg", tuple.getT2().get(0));
+        }).verifyComplete();
     }
 
     @Test
@@ -130,9 +133,13 @@ class BurgerJointsServiceTest {
 
         Venue venue = new Venue("rrr", "BurgerJoint", null);
 
-        ClientException thrown = assertThrows(ClientException.class, () -> burgerJointsService.getPhotoUrlsPerVenue(venue).block());
-        assertEquals(thrown.getStatus(), HttpStatus.BAD_REQUEST);
-        assertEquals(thrown.getMessage(), "Value rrr is invalid for venue id");
+        Mono<Tuple2<Venue, List<String>>> photoUrlsPerVenue = burgerJointsService.getPhotoUrlsPerVenue(venue);
+
+        StepVerifier.create(photoUrlsPerVenue.log()).expectErrorSatisfies(throwable -> {
+            ClientException clientException = (ClientException) throwable;
+            assertEquals(HttpStatus.BAD_REQUEST, clientException.getStatus());
+            assertEquals("Value rrr is invalid for venue id", clientException.getMessage());
+        }).verify();
     }
 
     @Test
@@ -154,11 +161,13 @@ class BurgerJointsServiceTest {
         photoUrls.add("https://fastly.4sqi.net/img/general/450x450/02.jpg");
 
         Tuple2<Venue, List<String>> tuple = Mono.just(venue).zipWith(Mono.just(photoUrls)).block();
-        venue = burgerJointsService.getVenueWithBurgerPhoto(tuple).block();
+        Mono<Venue> venueWithBurgerPhoto = burgerJointsService.getVenueWithBurgerPhoto(tuple);
 
-        assertEquals(venue.getId(), "42");
-        assertEquals(venue.getName(), "BurgerJoint");
-        assertEquals(venue.getBurgerPhotoUrl(), "https://fastly.4sqi.net/img/general/450x450/burger.jpg");
+        StepVerifier.create(venueWithBurgerPhoto.log()).assertNext(assertVenue -> {
+            assertEquals("42", assertVenue.getId());
+            assertEquals("BurgerJoint", assertVenue.getName());
+            assertEquals("https://fastly.4sqi.net/img/general/450x450/burger.jpg", assertVenue.getBurgerPhotoUrl());
+        }).verifyComplete();
     }
 
     @Test
@@ -179,11 +188,13 @@ class BurgerJointsServiceTest {
         photoUrls.add("https://fastly.4sqi.net/img/general/450x450/02.jpg");
 
         Tuple2<Venue, List<String>> tuple = Mono.just(venue).zipWith(Mono.just(photoUrls)).block();
-        venue = burgerJointsService.getVenueWithBurgerPhoto(tuple).block();
+        Mono<Venue> venueWithBurgerPhoto = burgerJointsService.getVenueWithBurgerPhoto(tuple);
 
-        assertEquals(venue.getId(), "42");
-        assertEquals(venue.getName(), "BurgerJoint");
-        assertNull(venue.getBurgerPhotoUrl());
+        StepVerifier.create(venueWithBurgerPhoto).assertNext(assertVenue -> {
+            assertEquals("42", assertVenue.getId());
+            assertEquals("BurgerJoint", assertVenue.getName());
+            assertNull(assertVenue.getBurgerPhotoUrl());
+        }).verifyComplete();
     }
 
     @Test
@@ -202,11 +213,13 @@ class BurgerJointsServiceTest {
         List<String> photoUrls = new ArrayList<>();
 
         Tuple2<Venue, List<String>> tuple = Mono.just(venue).zipWith(Mono.just(photoUrls)).block();
-        venue = burgerJointsService.getVenueWithBurgerPhoto(tuple).block();
+        Mono<Venue> venueWithBurgerPhoto = burgerJointsService.getVenueWithBurgerPhoto(tuple);
 
-        assertEquals(venue.getId(), "42");
-        assertEquals(venue.getName(), "BurgerJoint");
-        assertNull(venue.getBurgerPhotoUrl());
+        StepVerifier.create(venueWithBurgerPhoto.log()).assertNext(asssertVenue -> {
+            assertEquals("42", asssertVenue.getId());
+            assertEquals("BurgerJoint", asssertVenue.getName());
+            assertNull(asssertVenue.getBurgerPhotoUrl());
+        }).verifyComplete();
     }
 
     @Test
@@ -237,12 +250,20 @@ class BurgerJointsServiceTest {
         PhotoRecognitionClient photoRecognitionClient = new PhotoRecognitionClient(photoRecognitionBuilder, null);
         burgerJointsService = new BurgerJointsService(venueClient, photoRecognitionClient);
 
-        List<Venue> tartuVenues = burgerJointsService.getVenuesWithPhotoNear("Tartu").collectList().block();
+        Flux<Venue> tartuVenues = burgerJointsService.getVenuesWithPhotoNear("Tartu");
 
-        assertEquals(tartuVenues.size(), 2);
-        assertEquals(tartuVenues.get(0).getId(), "1");
-        assertEquals(tartuVenues.get(0).getName(), "joint1");
-        assertEquals(tartuVenues.get(0).getBurgerPhotoUrl(), "https://fastly.4sqi.net/img/general/450x450/burger.jpg");
+        StepVerifier.create(tartuVenues.log())
+                .assertNext(venue -> {
+                    assertEquals("1", venue.getId());
+                    assertEquals("joint1", venue.getName());
+                    assertEquals("https://fastly.4sqi.net/img/general/450x450/burger.jpg", venue.getBurgerPhotoUrl());
+                })
+                .assertNext(venue -> {
+                    assertEquals("2", venue.getId());
+                    assertEquals("joint2", venue.getName());
+                    assertEquals("https://fastly.4sqi.net/img/general/450x450/burger.jpg", venue.getBurgerPhotoUrl());
+                })
+                .verifyComplete();
     }
 
     private String buildBodyWithTwoVenues() {
