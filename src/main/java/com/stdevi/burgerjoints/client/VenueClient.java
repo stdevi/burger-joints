@@ -54,7 +54,6 @@ public class VenueClient {
                 .queryParam("v", v)
                 .queryParam("client_id", clientId)
                 .queryParam("client_secret", clientSecret)
-                .queryParam("oauth_token", oauth_token)
                 .build())
                 .retrieve()
                 .onStatus(httpStatus -> httpStatus.is4xxClientError() || httpStatus.is5xxServerError(), clientResponse ->
